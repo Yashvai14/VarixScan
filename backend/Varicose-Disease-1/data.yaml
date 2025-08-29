@@ -1,0 +1,13 @@
+names:
+- Normal
+- Varicose
+nc: 2
+roboflow:
+  license: CC BY 4.0
+  project: varicose-disease-dp898
+  url: https://universe.roboflow.com/varixscan/varicose-disease-dp898/dataset/1
+  version: 1
+  workspace: varixscan
+test: ../test/images
+train: ../train/images
+val: ../valid/images
