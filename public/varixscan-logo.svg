@@ -1,0 +1,31 @@
+<svg width="300" height="80" viewBox="0 0 300 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Heart with medical cross -->
+  <g transform="translate(10, 15)">
+    <!-- Heart shape -->
+    <path d="M25 45C25 45 10 30 10 20C10 15 13 10 20 10C23 10 25 12 25 15C25 12 27 10 30 10C37 10 40 15 40 20C40 30 25 45 25 45Z" 
+          fill="#2563eb" stroke="#2563eb" stroke-width="1"/>
+    
+    <!-- Medical cross -->
+    <rect x="22" y="18" width="6" height="14" rx="1" fill="white"/>
+    <rect x="18" y="22" width="14" height="6" rx="1" fill="white"/>
+    
+    <!-- Pulse line -->
+    <path d="M45 25 L55 25 L58 15 L62 35 L66 25 L75 25" 
+          stroke="#2563eb" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Company name -->
+  <text x="100" y="35" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="700" fill="#2563eb">
+    VarixScan
+  </text>
+  
+  <!-- Tagline -->
+  <text x="100" y="52" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="400" fill="#64748b">
+    MEDICAL CLINICS
+  </text>
+  
+  <!-- Decorative elements -->
+  <circle cx="260" cy="25" r="3" fill="#3b82f6" opacity="0.6"/>
+  <circle cx="270" cy="35" r="2" fill="#60a5fa" opacity="0.8"/>
+  <circle cx="280" cy="20" r="2.5" fill="#2563eb" opacity="0.4"/>
+</svg>

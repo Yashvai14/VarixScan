@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-
+import Navbar from "../components/navbar";
 
 export const metadata: Metadata = {
   title: "VarixScan - AI Varicose Vein Detection",
@@ -14,8 +14,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-      >
+      <body>
+        <Navbar />
         {children}
       </body>
     </html>

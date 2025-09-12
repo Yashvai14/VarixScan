@@ -1,5 +1,4 @@
 import React from 'react'
-import Navbar from '../components/navbar'
 import Hero from '../components/hero'
 import Cta from '../components/cta'
 import Feature from '../components/feature'
@@ -9,7 +8,6 @@ import Footer from '../components/footer'
 const home = () => {
   return (
     <>
-    <Navbar/>
     <Hero />
     <Feature />
     <Faq />
