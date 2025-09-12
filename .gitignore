@@ -44,11 +44,40 @@ next-env.d.ts
 # Ignore Python virtual environments
 venv/
 backend/venv/
+**/venv/
 
 # Ignore Python cache
 __pycache__/
 *.pyc
 *.pyo
+
+# Ignore large ML/AI libraries
+*.pyd
+*.dll
+*.lib
+*.so
+*.dylib
+
+# Ignore datasets and model files
+dataset/
+models/
+*.h5
+*.pkl
+*.joblib
+*.model
+*.weights
+
+# Ignore large media files (optional - you might want to use Git LFS for these)
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+
+# Ignore uploaded files
+backend/uploads/
+uploads/
 
 # Ignore environment configs
 .env
