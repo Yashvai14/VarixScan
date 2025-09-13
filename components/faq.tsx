@@ -41,7 +41,7 @@ export default function FAQSection() {
   return (
     <section className="bg-white py-20 px-4">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 text-lime-500">
+        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 text-medical-primary">
           Frequently Asked Questions
         </h2>
         <div className="space-y-4">
@@ -58,12 +58,12 @@ export default function FAQSection() {
                   onClick={() => toggleFAQ(faq.key)}
                   className="w-full flex justify-between items-center px-6 py-5 text-left text-[#111827] font-semibold text-base sm:text-lg focus:outline-none"
                 >
-                  <span className={`transition-all ${isOpen ? "font-bold text-lime-500" : ""}`}>
+                  <span className={`transition-all ${isOpen ? "font-bold text-medical-primary" : ""}`}>
                     {faq.question}
                   </span>
                   <FaChevronDown
                     className={`ml-4 text-gray-500 transform transition-transform duration-500 ${
-                      isOpen ? "rotate-180 text-[#0057FF]" : ""
+                      isOpen ? "rotate-180 text-medical-primary" : ""
                     }`}
                   />
                 </button>
