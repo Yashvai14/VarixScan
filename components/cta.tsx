@@ -1,4 +1,5 @@
 import React from 'react'
+import Link from 'next/link'
 import { Activity, Heart, ArrowRight } from 'lucide-react'
 
 const Cta = () => {
@@ -10,15 +11,15 @@ const Cta = () => {
                 VarixScan is your AI-powered assistant for varicose vein care, offering early detection, personalized risk assessment, and comprehensive health monitoring.
             </p>
             <div className='flex gap-4 mt-8'>
-                <button className='bg-white text-medical-primary py-3 font-semibold px-6 rounded-xl hover:bg-gray-100 transition-all duration-200 shadow-medical flex items-center gap-2'>
+                <Link href='/vericose' className='bg-white text-medical-primary py-3 font-semibold px-6 rounded-xl hover:bg-gray-100 transition-all duration-200 shadow-medical flex items-center gap-2 text-decoration-none'>
                     <Activity className='w-5 h-5' />
                     Get Started
                     <ArrowRight className='w-4 h-4' />
-                </button>
-                <button className='border-2 border-white text-white py-3 font-semibold px-6 rounded-xl hover:bg-white hover:text-medical-primary transition-all duration-200 flex items-center gap-2'>
+                </Link>
+                <Link href='/about' className='border-2 border-white text-white py-3 font-semibold px-6 rounded-xl hover:bg-white hover:text-medical-primary transition-all duration-200 flex items-center gap-2 text-decoration-none'>
                     <Heart className='w-5 h-5' />
                     Learn More
-                </button>
+                </Link>
             </div>
         </div>
     </div>

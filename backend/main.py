@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 # Import our custom modules
 from ml_model import VaricoseVeinDetector
-from database import db_manager
+from database import db_manager, convert_numpy_types
 from report_generator import report_generator
 from ai_chatbot import medical_chatbot
 
@@ -312,10 +312,12 @@ async def analyze_image(
             print(f"Failed to save analysis: {str(e)}")
             raise Exception(f"Database save failed: {str(e)}")
         
-        return {
+        # Convert numpy types for JSON response
+        response_data = {
             "analysis_id": db_analysis['id'],
             **analysis_result
         }
+        return convert_numpy_types(response_data)
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")

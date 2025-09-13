@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+import Link from 'next/link'
 import { Activity, Heart, Shield } from 'lucide-react'
 
 const Hero = () => {
@@ -13,14 +14,14 @@ const Hero = () => {
             VarixScan is your AI-powered varicose vein assistant. From early detection and severity analysis to personalized lifestyle advice and wearable sensor monitoring, VarixScan empowers patients and healthcare providers with actionable insights for better vein health.
           </p>
           <div className='flex gap-4 mt-8'>
-            <button className='bg-medical-primary py-3 font-semibold px-6 rounded-xl hover:bg-medical-secondary transition-all duration-200 text-white shadow-medical flex items-center gap-2'>
+            <Link href='/vericose' className='bg-medical-primary py-3 font-semibold px-6 rounded-xl hover:bg-medical-secondary transition-all duration-200 text-white shadow-medical flex items-center gap-2 text-decoration-none'>
               <Activity className='w-5 h-5' />
               Get Started
-            </button>
-            <button className='border border-medical-primary py-3 font-semibold px-6 rounded-xl hover:bg-medical-primary hover:text-white transition-all duration-200 text-medical-primary flex items-center gap-2'>
+            </Link>
+            <Link href='/about' className='border border-medical-primary py-3 font-semibold px-6 rounded-xl hover:bg-medical-primary hover:text-white transition-all duration-200 text-medical-primary flex items-center gap-2 text-decoration-none'>
               <Heart className='w-5 h-5' />
               Learn More
-            </button>
+            </Link>
           </div>
         </div>
         <div className='relative w-[300px] h-[300px] md:w-[350px] md:h-[350px] lg:w-[400px] lg:h-[400px] rounded-3xl overflow-hidden shadow-medical-lg bg-gradient-to-br from-medical-primary to-vascular-secondary'>

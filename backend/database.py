@@ -1,8 +1,24 @@
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 import json
+import numpy as np
 from supabase_client import get_supabase_client
 from supabase import Client
+
+def convert_numpy_types(obj):
+    """Recursively convert numpy data types to native Python types for JSON serialization"""
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {key: convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(item) for item in obj]
+    else:
+        return obj
 
 class DatabaseManager:
     def __init__(self):
@@ -67,6 +83,9 @@ class DatabaseManager:
         """Create a new analysis record"""
         try:
             print(f"Creating analysis with data: {analysis_data}")
+            
+            # Convert numpy types to native Python types for JSON serialization
+            analysis_data = convert_numpy_types(analysis_data)
             
             # Convert lists to JSON strings for JSONB columns
             if 'recommendations' in analysis_data and isinstance(analysis_data['recommendations'], list):

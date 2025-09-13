@@ -81,3 +81,24 @@ uploads/
 
 # Ignore environment configs
 .env
+
+# Ignore SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Ignore YOLOv8 model files (too large for git)
+*.pt
+yolov8*.pt
+
+# Ignore temporary files
+*.tmp
+*.temp
+*.log
+
+# Ignore test files and outputs
+test_*.py
+test_*.pdf
+*test*.png
+*test*.jpg
+*test*.jpeg

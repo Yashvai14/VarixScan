@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { 
   Heart, 
   Users, 
@@ -262,12 +263,12 @@ export default function AboutPage() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-medical-primary px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors duration-200">
+            <Link href="/vericose" className="bg-white text-medical-primary px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors duration-200 text-center text-decoration-none">
               Try Free Analysis
-            </button>
-            <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-medical-primary transition-all duration-200">
+            </Link>
+            <Link href="/contact" className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-medical-primary transition-all duration-200 text-center text-decoration-none">
               Contact Our Team
-            </button>
+            </Link>
           </div>
         </div>
       </div>
