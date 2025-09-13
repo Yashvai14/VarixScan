@@ -45,6 +45,9 @@ next-env.d.ts
 venv/
 backend/venv/
 **/venv/
+env/
+.env/
+.venv/
 
 # Ignore Python cache
 __pycache__/
@@ -102,3 +105,7 @@ test_*.pdf
 *test*.png
 *test*.jpg
 *test*.jpeg
+
+# Ignore training datasets and model directories
+Varicose-Disease-*/
+**/Varicose-Disease-*/
