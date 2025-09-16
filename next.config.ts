@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   
   // Image optimization
   images: {
-    domains: ['localhost', 'your-render-app.onrender.com'],
+    domains: ['localhost', 'varixscan.onrender.com'],
     unoptimized: false,
     formats: ['image/webp', 'image/avif'],
   },
@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
           {
             key: 'Access-Control-Allow-Origin',
             value: process.env.NODE_ENV === 'production' 
-              ? 'https://your-vercel-app.vercel.app' 
+              ? 'https://varixscan.onrender.com' 
               : 'http://localhost:3001',
           },
           {
