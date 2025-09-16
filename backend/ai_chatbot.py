@@ -2,8 +2,26 @@ import os
 import json
 from typing import List, Dict, Any
 from dotenv import load_dotenv
-from database import db_manager
-from medical_dataset import find_best_match, get_greeting, MEDICAL_KNOWLEDGE
+
+# Try to import database with fallback
+try:
+    from database import db_manager
+    DATABASE_AVAILABLE = True
+except ImportError:
+    DATABASE_AVAILABLE = False
+    # Mock database manager
+    class MockDBManager:
+        def save_chat_message(self, session_id, message, response, language):
+            print(f"Chat logged (mock): {session_id} - {message[:50]}...")
+    db_manager = MockDBManager()
+
+try:
+    from medical_dataset import find_best_match, get_greeting, MEDICAL_KNOWLEDGE
+    MEDICAL_DATASET_AVAILABLE = True
+except ImportError:
+    MEDICAL_DATASET_AVAILABLE = False
+    def find_best_match(message, language): return "Please consult a healthcare professional."
+    def get_greeting(language): return "Hello! How can I help you with vascular health today?"
 
 # Load environment variables
 load_dotenv()

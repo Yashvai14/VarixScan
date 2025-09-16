@@ -6,9 +6,18 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Supabase configuration with flexible key handling
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-# Try both SUPABASE_KEY (deployment) and SUPABASE_ANON_KEY (development)
-SUPABASE_KEY = os.getenv("SUPABASE_KEY") or os.getenv("SUPABASE_ANON_KEY")
+# Try multiple variable name patterns (backend vs frontend)
+SUPABASE_URL = (
+    os.getenv("SUPABASE_URL") or 
+    os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+)
+
+# Try all possible key variations
+SUPABASE_KEY = (
+    os.getenv("SUPABASE_KEY") or 
+    os.getenv("SUPABASE_ANON_KEY") or 
+    os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+)
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     # More informative error for debugging
