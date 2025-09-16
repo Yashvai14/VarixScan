@@ -15,8 +15,16 @@ from sqlalchemy.orm import Session
 from ml_model import VaricoseVeinDetector
 from advanced_ml_model import advanced_detector
 from database import db_manager, convert_numpy_types
-from report_generator import report_generator
 from ai_chatbot import medical_chatbot
+
+# Optional import for report generation
+try:
+    from report_generator import report_generator
+    REPORTS_AVAILABLE = True
+except ImportError:
+    print("⚠️  ReportLab not available - PDF reports disabled")
+    REPORTS_AVAILABLE = False
+    report_generator = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -450,6 +458,12 @@ async def generate_report(
     db: Session = Depends(get_db)
 ):
     """Generate PDF report for patient analysis"""
+    if not REPORTS_AVAILABLE:
+        raise HTTPException(
+            status_code=503, 
+            detail="PDF report generation is temporarily unavailable. ReportLab not installed."
+        )
+    
     try:
         # Get patient data
         patient = db_manager.get_patient(db, patient_id)
@@ -519,6 +533,12 @@ async def generate_report(
 @app.get("/download-report/{report_id}")
 async def download_report(report_id: int, db: Session = Depends(get_db)):
     """Download generated PDF report"""
+    if not REPORTS_AVAILABLE:
+        raise HTTPException(
+            status_code=503, 
+            detail="PDF report downloads are temporarily unavailable. ReportLab not installed."
+        )
+    
     try:
         report = db_manager.get_report(db, report_id)
         if not report or not os.path.exists(report["pdf_path"]):

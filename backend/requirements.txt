@@ -18,9 +18,6 @@ supabase==2.18.1
 # AI API
 openai==1.35.0
 
-# PDF Generation (stable version)
-reportlab==3.6.0
-
 # Authentication
 bcrypt==4.0.1
 python-jose==3.3.0
