@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import axios from "axios";
 import { 
   Upload, 
@@ -23,7 +24,15 @@ export default function UploadPage() {
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [result, setResult] = useState<string>("");
-  const [analysisData, setAnalysisData] = useState<any>(null); // Store full analysis data
+  const [analysisData, setAnalysisData] = useState<{
+    analysis_id: number;
+    diagnosis: string;
+    confidence: number;
+    severity: string;
+    detection_count?: number;
+    affected_area_ratio?: number;
+    recommendations?: string[];
+  } | null>(null); // Store full analysis data
   const [patientId, setPatientId] = useState<number | null>(null); // Store patient ID
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
@@ -284,11 +293,14 @@ export default function UploadPage() {
 
               {preview && (
                 <div className="mt-6">
-                  <img
-                    src={preview}
-                    alt="Preview"
-                    className="w-full h-64 object-cover rounded-xl border border-gray-200 shadow-medical"
-                  />
+                  <div className="relative w-full h-64 rounded-xl border border-gray-200 shadow-medical overflow-hidden">
+                    <Image
+                      src={preview}
+                      alt="Preview"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                   <p className="text-sm text-gray-500 mt-2 text-center">Image ready for analysis</p>
                 </div>
               )}
