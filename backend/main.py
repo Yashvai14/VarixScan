@@ -197,6 +197,34 @@ def translate_text(text: str, language: str = "en") -> str:
         return TRANSLATIONS[language][text]
     return text
 
+# Health check endpoint for Render deployment
+@app.get("/")
+async def root():
+    """Root endpoint for health checks"""
+    return {
+        "message": "VarixScan AI API is running",
+        "status": "healthy",
+        "version": "2.0.0",
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.get("/health")
+async def health_check():
+    """Detailed health check endpoint"""
+    try:
+        # Test database connection
+        db = db_manager.get_db()
+        db_status = "connected"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+    
+    return {
+        "status": "healthy",
+        "database": db_status,
+        "ai_model": "loaded" if detector else "not loaded",
+        "timestamp": datetime.now().isoformat()
+    }
+
 @app.post("/patients/")
 async def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
     """Create a new patient record"""
