@@ -14,7 +14,6 @@ import {
   Bluetooth,
   Battery,
   Smartphone,
-  Calendar,
   BarChart3
 } from "lucide-react";
 
@@ -41,6 +40,7 @@ export default function WearableMonitoring() {
   const [selectedDevice, setSelectedDevice] = useState<string>("smartwatch");
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isClient, setIsClient] = useState(false);
 
   // Mock health data
   const [healthMetrics, setHealthMetrics] = useState<HealthMetric[]>([
@@ -110,6 +110,9 @@ export default function WearableMonitoring() {
   ];
 
   useEffect(() => {
+    // Set isClient to true after component mounts
+    setIsClient(true);
+    
     const timer = setInterval(() => {
       setCurrentTime(new Date());
       
@@ -280,7 +283,7 @@ export default function WearableMonitoring() {
             <div className="bg-white shadow-medical-lg rounded-2xl p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-medical-dark mb-4 flex items-center gap-2">
                 <Clock className="w-5 h-5 text-medical-primary" />
-                Today's Activity Timeline
+Today&apos;s Activity Timeline
               </h3>
               
               <div className="space-y-3">
@@ -334,8 +337,8 @@ export default function WearableMonitoring() {
                   
                   <div className="text-center py-2">
                     <div className="text-sm text-gray-500">Live since</div>
-                    <div className="font-mono text-lg font-semibold text-medical-primary">
-                      {currentTime.toLocaleTimeString()}
+                    <div className="font-mono text-lg font-semibold text-medical-primary" suppressHydrationWarning>
+                      {isClient ? currentTime.toLocaleTimeString() : '--:--:--'}
                     </div>
                   </div>
                 </div>

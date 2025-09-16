@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { 
   Heart, 
@@ -79,30 +80,30 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-medical-light via-white to-vascular-light">
       {/* Hero Section */}
-      <div className="pt-16 pb-20">
-        <div className="max-w-4xl mx-auto text-center px-6">
-          <div className="flex items-center justify-center gap-3 mb-6">
+      <div className="pt-12 sm:pt-16 pb-16 sm:pb-20">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6 sm:mb-8">
             <div className="p-3 bg-medical-primary rounded-full">
-              <Heart className="w-8 h-8 text-white" />
+              <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-medical-dark font-medical">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-medical-dark font-medical leading-tight">
               About VarixScan
             </h1>
           </div>
           
-          <p className="text-xl text-medical-dark/70 mb-8 leading-relaxed">
+          <p className="text-base sm:text-lg lg:text-xl text-medical-dark/70 mb-8 sm:mb-10 leading-relaxed max-w-3xl mx-auto">
             Revolutionizing vascular health through advanced AI technology, making professional-grade 
             varicose vein detection accessible to everyone, everywhere.
           </p>
 
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {stats.map((stat, index) => (
-              <div key={index} className="bg-white p-6 rounded-2xl shadow-medical border border-gray-100">
+              <div key={index} className="bg-white p-4 sm:p-6 rounded-2xl shadow-medical border border-gray-100">
                 <div className="flex items-center justify-center mb-3 text-medical-primary">
-                  {stat.icon}
+                  {React.cloneElement(stat.icon, { className: "w-6 h-6 sm:w-8 sm:h-8" })}
                 </div>
-                <div className="text-3xl font-bold text-medical-dark mb-1">{stat.value}</div>
-                <div className="text-sm text-gray-600">{stat.label}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-medical-dark mb-1">{stat.value}</div>
+                <div className="text-xs sm:text-sm text-gray-600">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -110,45 +111,45 @@ export default function AboutPage() {
       </div>
 
       {/* Mission Section */}
-      <div className="py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="py-12 sm:py-16 lg:py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-medical-dark mb-6 flex items-center gap-3">
-                <Target className="w-8 h-8 text-medical-primary" />
+              <h2 className="text-2xl sm:text-3xl font-bold text-medical-dark mb-4 sm:mb-6 flex items-center gap-3">
+                <Target className="w-6 h-6 sm:w-8 sm:h-8 text-medical-primary" />
                 Our Mission
               </h2>
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+              <p className="text-base sm:text-lg text-gray-700 mb-4 sm:mb-6 leading-relaxed">
                 We believe that early detection and proper monitoring of vascular conditions should be 
                 accessible to everyone, regardless of location or economic status. Our AI-powered platform 
                 democratizes healthcare by bringing expert-level diagnostic capabilities directly to patients 
                 and healthcare providers worldwide.
               </p>
-              <p className="text-lg text-gray-700 leading-relaxed">
+              <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
                 By combining cutting-edge artificial intelligence with the expertise of certified medical 
-                professionals, we're creating a new standard of care for vascular health that is both 
+                professionals, we&apos;re creating a new standard of care for vascular health that is both 
                 accurate and accessible.
               </p>
             </div>
             
-            <div className="bg-gradient-to-br from-medical-primary to-vascular-secondary p-8 rounded-2xl text-white">
-              <h3 className="text-2xl font-semibold mb-4">Why It Matters</h3>
-              <ul className="space-y-3">
+            <div className="bg-gradient-to-br from-medical-primary to-vascular-secondary p-6 sm:p-8 rounded-2xl text-white">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Why It Matters</h3>
+              <ul className="space-y-2 sm:space-y-3">
                 <li className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0" />
-                  <span>Over 40 million people worldwide suffer from varicose veins</span>
+                  <span className="text-sm sm:text-base">Over 40 million people worldwide suffer from varicose veins</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0" />
-                  <span>Early detection can prevent serious complications</span>
+                  <span className="text-sm sm:text-base">Early detection can prevent serious complications</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0" />
-                  <span>Many areas lack access to specialized vascular care</span>
+                  <span className="text-sm sm:text-base">Many areas lack access to specialized vascular care</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0" />
-                  <span>AI can bridge the gap between patients and specialists</span>
+                  <span className="text-sm sm:text-base">AI can bridge the gap between patients and specialists</span>
                 </li>
               </ul>
             </div>
@@ -245,7 +246,7 @@ export default function AboutPage() {
               <p className="text-medical-dark/70 leading-relaxed max-w-4xl mx-auto">
                 Our research team continuously works to improve our AI algorithms through clinical studies, 
                 peer-reviewed research, and collaboration with leading medical institutions worldwide. 
-                We're committed to advancing the field of vascular medicine through evidence-based innovation.
+                We&apos;re committed to advancing the field of vascular medicine through evidence-based innovation.
               </p>
             </div>
           </div>

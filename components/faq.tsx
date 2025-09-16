@@ -39,9 +39,9 @@ export default function FAQSection() {
   };
 
   return (
-    <section className="bg-white py-20 px-4">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 text-medical-primary">
+    <section className="bg-white py-16 sm:py-20 md:py-24 lg:py-32 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-10 md:mb-12 lg:mb-16 text-medical-primary font-medical leading-tight">
           Frequently Asked Questions
         </h2>
         <div className="space-y-4">
@@ -56,13 +56,13 @@ export default function FAQSection() {
               >
                 <button
                   onClick={() => toggleFAQ(faq.key)}
-                  className="w-full flex justify-between items-center px-6 py-5 text-left text-[#111827] font-semibold text-base sm:text-lg focus:outline-none"
+                  className="w-full flex justify-between items-center px-4 sm:px-6 py-4 sm:py-5 text-left text-[#111827] font-semibold text-sm sm:text-base lg:text-lg focus:outline-none"
                 >
-                  <span className={`transition-all ${isOpen ? "font-bold text-medical-primary" : ""}`}>
+                  <span className={`transition-all pr-4 ${isOpen ? "font-bold text-medical-primary" : ""}`}>
                     {faq.question}
                   </span>
                   <FaChevronDown
-                    className={`ml-4 text-gray-500 transform transition-transform duration-500 ${
+                    className={`ml-2 sm:ml-4 text-gray-500 transform transition-transform duration-500 flex-shrink-0 ${
                       isOpen ? "rotate-180 text-medical-primary" : ""
                     }`}
                   />
@@ -74,9 +74,9 @@ export default function FAQSection() {
                     transition: "max-height 0.5s ease, opacity 0.5s ease",
                     opacity: isOpen ? 1 : 0,
                   }}
-                  className="px-6 text-gray-600 text-sm leading-relaxed"
+                  className="px-4 sm:px-6 text-gray-600 text-xs sm:text-sm lg:text-base leading-relaxed"
                 >
-                  <div className="py-4">{faq.answer}</div>
+                  <div className="py-3 sm:py-4">{faq.answer}</div>
                 </div>
               </div>
             );

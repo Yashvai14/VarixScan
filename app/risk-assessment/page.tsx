@@ -8,7 +8,6 @@ import {
   User, 
   Calendar,
   Weight,
-  Briefcase,
   Heart,
   Activity,
   Clock,

@@ -18,6 +18,13 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "backend/**",
+      "venv/**",
+      "**/*.py",
+      "**/matplotlib/**/*.js",
+      "**/sklearn/**/*.js",
+      "**/torch/**/*.js",
+      "**/torch/**/*.mjs",
     ],
   },
 ];

@@ -93,26 +93,26 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-medical-light via-white to-vascular-light">
       {/* Header */}
-      <div className="pt-16 pb-12">
-        <div className="max-w-4xl mx-auto text-center px-6">
-          <div className="flex items-center justify-center gap-3 mb-6">
+      <div className="pt-12 sm:pt-16 pb-8 sm:pb-12">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6 sm:mb-8">
             <div className="p-3 bg-medical-primary rounded-full">
-              <MessageSquare className="w-8 h-8 text-white" />
+              <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-medical-dark font-medical">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-medical-dark font-medical leading-tight">
               Contact Us
             </h1>
           </div>
           
-          <p className="text-xl text-medical-dark/70 leading-relaxed">
-            Get in touch with our team of medical and technical experts. We're here to help 
+          <p className="text-base sm:text-lg lg:text-xl text-medical-dark/70 leading-relaxed max-w-3xl mx-auto">
+            Get in touch with our team of medical and technical experts. We&apos;re here to help 
             you make the most of our AI-powered vascular health platform.
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 pb-20">
-        <div className="grid lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12 sm:pb-16 lg:pb-20">
+        <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Contact Form */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-medical-lg p-8 border border-gray-100">
@@ -128,7 +128,7 @@ export default function ContactPage() {
                     Message Sent Successfully!
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    Thank you for contacting us. We'll get back to you within 24 hours.
+                    Thank you for contacting us. We&apos;ll get back to you within 24 hours.
                   </p>
                   <button 
                     onClick={() => setSubmitted(false)}
@@ -301,7 +301,7 @@ export default function ContactPage() {
                     Medical Emergency?
                   </h4>
                   <p className="text-sm text-red-700 mb-3">
-                    This platform is not for emergency medical situations. If you're experiencing 
+                    This platform is not for emergency medical situations. If you&apos;re experiencing 
                     a medical emergency, please contact your local emergency services immediately.
                   </p>
                   <p className="text-xs text-red-600">

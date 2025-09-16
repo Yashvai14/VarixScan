@@ -35,44 +35,51 @@ export default function FeaturesSection() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <section className="w-full py-32 bg-gradient-to-br from-vascular-light to-medical-light" id="features">
-      <div className="max-w-[1200px] mx-auto" style={{ width: "1200px" }}>
-        <h2 className="text-6xl font-bold text-medical-primary mb-4 font-medical">Why Choose VarixScan?</h2>
-        <p className="text-medical-dark/70 text-xl mb-20 max-w-2xl">
-          Stay ahead in vein health with AI-driven insights, personalized monitoring, and multilingual guidance.
-        </p>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-8 md:space-y-0 md:space-x-8">
+    <section className="w-full py-16 sm:py-20 md:py-24 lg:py-32 bg-gradient-to-br from-vascular-light to-medical-light px-4 sm:px-6 lg:px-8" id="features">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-medical-primary mb-4 sm:mb-6 font-medical leading-tight">
+            Why Choose VarixScan?
+          </h2>
+          <p className="text-medical-dark/70 text-lg sm:text-xl lg:text-xl max-w-3xl mx-auto leading-relaxed">
+            Stay ahead in vein health with AI-driven insights, personalized monitoring, and multilingual guidance.
+          </p>
+        </div>
+        
+        <div className="flex flex-col xl:flex-row gap-8 lg:gap-12">
           {/* Feature titles */}
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-3 sm:space-y-4 xl:min-w-[400px]">
             {features.map((feature, index) => (
               <button
                 key={index}
-                className={`p-5 rounded-xl text-xl transition-all duration-300 flex items-center gap-3 ${
+                className={`p-4 sm:p-5 rounded-xl text-sm sm:text-base lg:text-lg xl:text-xl transition-all duration-300 flex items-center gap-3 text-left ${
                   activeIndex === index
                     ? "bg-medical-primary text-white shadow-medical-lg"
                     : "bg-white text-medical-dark hover:bg-medical-light hover:shadow-medical border border-gray-200"
                 }`}
                 onClick={() => setActiveIndex(index)}
               >
-                <div className={`${activeIndex === index ? 'text-white' : 'text-medical-primary'}`}>
+                <div className={`flex-shrink-0 ${activeIndex === index ? 'text-white' : 'text-medical-primary'}`}>
                   {feature.icon}
                 </div>
-                {feature.title}
+                <span className="font-semibold">{feature.title}</span>
               </button>
             ))}
           </div>
 
           {/* Feature description */}
-          <div className="bg-white p-8 h-[400px] w-[800px] rounded-xl border border-gray-200 shadow-medical-lg">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="p-3 bg-medical-primary rounded-xl text-white">
+          <div className="bg-white p-6 sm:p-8 min-h-[300px] sm:min-h-[350px] lg:min-h-[400px] flex-1 rounded-xl border border-gray-200 shadow-medical-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+              <div className="p-3 bg-medical-primary rounded-xl text-white w-fit">
                 {features[activeIndex].icon}
               </div>
-              <h3 className="text-3xl font-semibold text-medical-primary">
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-medical-primary leading-tight">
                 {features[activeIndex].title}
               </h3>
             </div>
-            <p className="text-medical-dark/80 text-base leading-relaxed">{features[activeIndex].description}</p>
+            <p className="text-medical-dark/80 text-sm sm:text-base lg:text-lg leading-relaxed">
+              {features[activeIndex].description}
+            </p>
           </div>
         </div>
       </div>

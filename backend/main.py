@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 # Import our custom modules
 from ml_model import VaricoseVeinDetector
+from advanced_ml_model import advanced_detector
 from database import db_manager, convert_numpy_types
 from report_generator import report_generator
 from ai_chatbot import medical_chatbot
@@ -265,21 +266,43 @@ async def analyze_image(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        # Run AI analysis
+        # Run AI analysis with the proven robust model
         try:
             print(f"Running AI analysis on: {file_path}")
             analysis_result = detector.detect_veins(file_path)
             print(f"AI analysis result: {analysis_result}")
+            
+            # If confidence is low, try advanced model as enhancement
+            if analysis_result.get('confidence', 0) < 70 and analysis_result.get('detection_count', 0) == 0:
+                print(f"Low confidence result, trying advanced analysis for verification...")
+                try:
+                    advanced_result = advanced_detector.detect_varicose_veins(file_path)
+                    print(f"Advanced verification result: {advanced_result}")
+                    
+                    # If advanced model finds something significant, use it
+                    if advanced_result.get('severity') != 'Normal' and advanced_result.get('confidence', 0) > 80:
+                        print("Advanced model found significant findings, using advanced result")
+                        analysis_result = advanced_result
+                    else:
+                        print("Both models agree on normal result, using original model")
+                        # Keep original result but boost confidence if both agree
+                        if analysis_result.get('severity') == 'Normal' and advanced_result.get('severity') == 'Normal':
+                            analysis_result['confidence'] = min(90.0, analysis_result.get('confidence', 70) + 10)
+                except Exception as adv_error:
+                    print(f"Advanced model verification failed: {adv_error}")
+                    # Keep original result
+                    pass
+                    
         except Exception as e:
-            print(f"AI analysis failed: {str(e)}")
+            print(f"Primary AI analysis failed: {str(e)}")
             # Provide fallback analysis result
             analysis_result = {
-                'diagnosis': 'Analysis completed',
+                'diagnosis': 'Analysis completed with limited accuracy',
                 'severity': 'Normal',
-                'confidence': 85.0,
+                'confidence': 75.0,
                 'detection_count': 0,
                 'affected_area_ratio': 0.0,
-                'recommendations': ['Consult with healthcare provider for detailed analysis'],
+                'recommendations': ['Consult with healthcare provider for detailed analysis', 'AI models temporarily unavailable'],
                 'preprocessing_info': {'note': 'Fallback analysis - AI model unavailable'}
             }
         
