@@ -253,9 +253,23 @@ async def health_check():
     
     return {
         "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
         "database": db_status,
-        "ai_model": "loaded" if detector else "not loaded",
-        "timestamp": datetime.now().isoformat()
+        "features": {
+            "basic_ml_model": ML_BASIC_AVAILABLE,
+            "advanced_ml_model": ML_ADVANCED_AVAILABLE,
+            "pdf_reports": REPORTS_AVAILABLE,
+            "ai_chatbot": True,  # Always available
+            "image_upload": True,  # Always available
+            "patient_management": True  # Always available
+        },
+        "modules_loaded": {
+            "opencv": 'cv2' in globals() or ML_BASIC_AVAILABLE,
+            "torch": ML_BASIC_AVAILABLE or ML_ADVANCED_AVAILABLE,
+            "scikit_learn": ML_ADVANCED_AVAILABLE,
+            "fpdf2": REPORTS_AVAILABLE,
+            "openai": True
+        }
     }
 
 @app.post("/patients/")
