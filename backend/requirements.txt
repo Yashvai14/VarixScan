@@ -1,6 +1,6 @@
-# Essential Web Framework
+# Web Framework & API
 fastapi==0.104.1
-uvicorn==0.24.0
+uvicorn[standard]==0.24.0
 python-multipart==0.0.6
 aiofiles==23.2.1
 
@@ -13,13 +13,30 @@ jinja2==3.1.2
 sqlalchemy==2.0.23
 supabase==2.18.1
 
-# Minimal Image Processing (no complex builds)
+# Computer Vision & Image Processing (deployment-ready versions)
+opencv-python-headless==4.8.1.78
 pillow==10.0.1
 numpy==1.24.3
+scikit-image==0.22.0
+matplotlib==3.8.2
 
-# AI API
+# Machine Learning & Data Science
+pandas==2.1.3
+seaborn==0.13.0
+scikit-learn==1.3.2
+
+# Deep Learning & AI (CPU versions for deployment)
+torch==2.1.1+cpu --find-links https://download.pytorch.org/whl/torch_stable.html
+torchvision==0.16.1+cpu --find-links https://download.pytorch.org/whl/torch_stable.html
+ultralytics==8.0.232
+
+# PDF Generation (deployment-friendly)
+fpdf2==2.7.6
+weasyprint==60.2
+
+# AI & NLP
 openai==1.35.0
 
-# Authentication
+# Authentication & Security
 bcrypt==4.0.1
-python-jose==3.3.0
+python-jose[cryptography]==3.3.0
