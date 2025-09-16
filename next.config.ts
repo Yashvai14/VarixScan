@@ -19,9 +19,9 @@ const nextConfig: NextConfig = {
   },
   
   // Experimental features for better performance
-  experimental: {
-    optimizeCss: true,
-  },
+  // experimental: {
+  //   optimizeCss: true, // Requires 'critters' package - disabled to fix build
+  // },
   
   // Output configuration
   trailingSlash: false,

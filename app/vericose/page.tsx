@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { 
   Upload, 
   User, 
@@ -32,8 +32,8 @@ export default function UploadPage() {
     detection_count?: number;
     affected_area_ratio?: number;
     recommendations?: string[];
-  } | null>(null); // Store full analysis data
-  const [patientId, setPatientId] = useState<number | null>(null); // Store patient ID
+  } | null>(null); 
+  const [patientId, setPatientId] = useState<number | null>(null); 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [error, setError] = useState<string>("");
@@ -63,33 +63,26 @@ export default function UploadPage() {
       }).catch(() => null);
       
       if (!backendCheck) {
-        // Backend not available - show demo result
+        // Backend not available - demo mode
         console.log("Backend not available, showing demo analysis...");
-        
-        // Simulate analysis time
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Generate demo result based on uploaded image
         const demoResults = [
           { diagnosis: "Mild Varicose Veins", confidence: 92, severity: "Mild" },
           { diagnosis: "No Abnormalities Detected", confidence: 98, severity: "Normal" },
           { diagnosis: "Moderate Varicose Veins", confidence: 87, severity: "Moderate" }
         ];
-        
         const randomResult = demoResults[Math.floor(Math.random() * demoResults.length)];
-        
         setResult(`Patient: ${name}\nDiagnosis: ${randomResult.diagnosis}\nConfidence: ${randomResult.confidence}%\nSeverity: ${randomResult.severity}\n\n⚠️ Demo Mode: Backend server not running. Start the backend for real analysis.`);
         return;
       }
 
-      // Step 1: Create patient first
-      console.log("Creating patient...");
+      // Step 1: Create patient
       const patientData = {
         name: name,
         age: parseInt(age),
         gender: gender,
-        phone: "+1234567890", // Optional
-        email: `${name.toLowerCase().replace(' ', '')}@example.com` // Optional
+        phone: "+1234567890", 
+        email: `${name.toLowerCase().replace(' ', '')}@example.com`
       };
       
       const patientRes = await axios.post("http://localhost:8000/patients/", patientData, {
@@ -97,11 +90,9 @@ export default function UploadPage() {
       });
       
       const patientIdValue = patientRes.data.patient_id;
-      console.log(`Patient created with ID: ${patientIdValue}`);
       setPatientId(patientIdValue);
       
-      // Step 2: Analyze image with the patient_id
-      console.log("Analyzing image...");
+      // Step 2: Analyze image
       const formData = new FormData();
       formData.append("file", file);
       formData.append("patient_id", patientIdValue.toString());
@@ -111,34 +102,23 @@ export default function UploadPage() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       
-      // Store the full analysis data for report generation
       setAnalysisData(res.data);
       setResult(`Patient: ${name}\nDiagnosis: ${res.data.diagnosis}\nConfidence: ${res.data.confidence}%\nSeverity: ${res.data.severity}`);
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error:", err);
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as AxiosError<{ detail?: string }>;
-        console.error("Response data:", axiosError.response?.data);
-        setError(`Error: ${axiosError.response?.data?.detail || 'Analysis failed'}`);
-      } else if (err && typeof err === 'object' && ('code' in err || 'message' in err)) {
-        const networkError = err as unknown;
-        if (
-          typeof networkError === "object" &&
-          networkError !== null &&
-          "code" in networkError &&
-          "message" in networkError &&
-          typeof (networkError as { code?: string; message?: string }).message === "string"
-        ) {
-          const { code, message } = networkError as { code?: string; message?: string };
-          if (code === 'ECONNREFUSED' || message?.includes('Network Error')) {
-            setError("Backend server not running. Please start the backend server to perform real analysis.");
-          } else {
-            setError("Error analyzing image. Please try again.");
-          }
+
+      if (axios.isAxiosError(err)) {
+        if (err.response) {
+          console.error("Response data:", err.response.data);
+          setError(`Error: ${err.response.data?.detail || 'Analysis failed'}`);
+        } else if (err.code === 'ECONNREFUSED' || err.message?.includes('Network Error')) {
+          setError("Backend server not running. Please start the backend server to perform real analysis.");
         } else {
-          setError("Error analyzing image. Please try again.");
+          setError(err.message || "Error analyzing image. Please try again.");
         }
+      } else if (err instanceof Error) {
+        setError(err.message || "Error analyzing image. Please try again.");
       } else {
         setError("Error analyzing image. Please try again.");
       }
@@ -157,15 +137,12 @@ export default function UploadPage() {
     setError("");
 
     try {
-      // Generate report using backend API
       const generateResponse = await axios.post(
         `http://localhost:8000/generate-report/${patientId}?analysis_id=${analysisData.analysis_id}&report_type=standard`
       );
 
       if (generateResponse.data) {
         const reportId = generateResponse.data.report_id;
-        
-        // Download the generated PDF with fetch to avoid IDM interception
         const downloadResponse = await fetch(
           `http://localhost:8000/download-report/${reportId}`,
           { 
@@ -181,7 +158,6 @@ export default function UploadPage() {
           throw new Error('Failed to download report');
         }
 
-        // Create blob with explicit PDF mime type and download
         const blob = await downloadResponse.blob();
         const pdfBlob = new Blob([blob], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(pdfBlob);
@@ -190,13 +166,8 @@ export default function UploadPage() {
         a.href = url;
         a.download = `VarixScan-Report-${name}-${reportId}.pdf`;
         a.rel = 'noopener';
-        
-        // Add timestamp to prevent caching issues
         a.href += `#${Date.now()}`;
-        
         document.body.appendChild(a);
-        
-        // Force click with timeout to ensure DOM is ready
         setTimeout(() => {
           a.click();
           setTimeout(() => {
@@ -205,9 +176,16 @@ export default function UploadPage() {
           }, 100);
         }, 100);
       }
-    } catch (error) {
-      console.error('Error generating report:', error);
-      setError('Failed to generate report. Please try again.');
+    } catch (err: unknown) {
+      console.error("Error generating report:", err);
+
+      if (axios.isAxiosError(err)) {
+        setError(err.message || "Failed to generate report. Please try again.");
+      } else if (err instanceof Error) {
+        setError(err.message || "Failed to generate report. Please try again.");
+      } else {
+        setError("Failed to generate report. Please try again.");
+      }
     } finally {
       setIsGeneratingReport(false);
     }
@@ -239,7 +217,6 @@ export default function UploadPage() {
               Patient Information
             </h2>
 
-            {/* Patient Info Form */}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-medical-dark mb-2">
@@ -286,7 +263,6 @@ export default function UploadPage() {
               </div>
             </div>
 
-            {/* File Upload Section */}
             <div className="mt-8">
               <label className="block text-sm font-medium text-medical-dark mb-4">
                 <FileImage className="w-4 h-4 inline mr-1" />
@@ -323,7 +299,6 @@ export default function UploadPage() {
               )}
             </div>
 
-            {/* Error Display */}
             {error && (
               <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2">
                 <AlertCircle className="w-5 h-5 text-red-500" />
@@ -331,7 +306,6 @@ export default function UploadPage() {
               </div>
             )}
 
-            {/* Analyze Button */}
             <button
               onClick={handleAnalyze}
               disabled={isAnalyzing || !file || !name || !age || !gender}
