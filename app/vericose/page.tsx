@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { 
   Upload, 
   User, 
@@ -118,13 +118,24 @@ export default function UploadPage() {
     } catch (err) {
       console.error("Error:", err);
       if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as any;
-        console.error("Response data:", axiosError.response.data);
-        setError(`Error: ${axiosError.response.data.detail || 'Analysis failed'}`);
+        const axiosError = err as AxiosError<{ detail?: string }>;
+        console.error("Response data:", axiosError.response?.data);
+        setError(`Error: ${axiosError.response?.data?.detail || 'Analysis failed'}`);
       } else if (err && typeof err === 'object' && ('code' in err || 'message' in err)) {
-        const networkError = err as any;
-        if (networkError.code === 'ECONNREFUSED' || networkError.message?.includes('Network Error')) {
-          setError("Backend server not running. Please start the backend server to perform real analysis.");
+        const networkError = err as unknown;
+        if (
+          typeof networkError === "object" &&
+          networkError !== null &&
+          "code" in networkError &&
+          "message" in networkError &&
+          typeof (networkError as { code?: string; message?: string }).message === "string"
+        ) {
+          const { code, message } = networkError as { code?: string; message?: string };
+          if (code === 'ECONNREFUSED' || message?.includes('Network Error')) {
+            setError("Backend server not running. Please start the backend server to perform real analysis.");
+          } else {
+            setError("Error analyzing image. Please try again.");
+          }
         } else {
           setError("Error analyzing image. Please try again.");
         }
