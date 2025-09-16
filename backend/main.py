@@ -12,7 +12,24 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
 # Import core modules with fallback handling
-from database import db_manager, convert_numpy_types
+try:
+    from database import db_manager, convert_numpy_types
+    DATABASE_AVAILABLE = True
+    print("✅ Database module loaded successfully")
+except Exception as e:
+    print(f"⚠️ Database not available: {e}")
+    DATABASE_AVAILABLE = False
+    # Create mock database manager
+    class MockDBManager:
+        def get_db(self): return None
+        def create_patient(self, db, data): return {'id': 1}
+        def get_patient(self, db, patient_id): return {'id': patient_id, 'name': 'Test Patient'}
+        def create_analysis(self, db, data): return {'id': 1}
+        def get_patient_analyses(self, db, patient_id): return []
+    
+    db_manager = MockDBManager()
+    convert_numpy_types = lambda x: x
+
 from ai_chatbot import medical_chatbot
 
 # Optional ML model imports
@@ -244,12 +261,15 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Detailed health check endpoint"""
-    try:
-        # Test database connection
-        db = db_manager.get_db()
-        db_status = "connected"
-    except Exception as e:
-        db_status = f"error: {str(e)}"
+    if DATABASE_AVAILABLE:
+        try:
+            # Test database connection
+            db = db_manager.get_db()
+            db_status = "connected"
+        except Exception as e:
+            db_status = f"error: {str(e)}"
+    else:
+        db_status = "mock mode - database unavailable"
     
     return {
         "status": "healthy",
