@@ -117,11 +117,17 @@ export default function UploadPage() {
       
     } catch (err) {
       console.error("Error:", err);
-      if (err.response) {
-        console.error("Response data:", err.response.data);
-        setError(`Error: ${err.response.data.detail || 'Analysis failed'}`);
-      } else if (err.code === 'ECONNREFUSED' || err.message.includes('Network Error')) {
-        setError("Backend server not running. Please start the backend server to perform real analysis.");
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as any;
+        console.error("Response data:", axiosError.response.data);
+        setError(`Error: ${axiosError.response.data.detail || 'Analysis failed'}`);
+      } else if (err && typeof err === 'object' && ('code' in err || 'message' in err)) {
+        const networkError = err as any;
+        if (networkError.code === 'ECONNREFUSED' || networkError.message?.includes('Network Error')) {
+          setError("Backend server not running. Please start the backend server to perform real analysis.");
+        } else {
+          setError("Error analyzing image. Please try again.");
+        }
       } else {
         setError("Error analyzing image. Please try again.");
       }
