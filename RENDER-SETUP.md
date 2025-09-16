@@ -16,9 +16,6 @@
 SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_KEY=your-supabase-service-key-here
 
-# AI Configuration (REQUIRED)  
-OPENAI_API_KEY=sk-your-openai-api-key-here
-
 # Application Settings
 ENVIRONMENT=production
 DEBUG=false
@@ -35,10 +32,6 @@ PORT=10000
    - **Project URL** → Use for `SUPABASE_URL`
    - **Service Role Key** (secret) → Use for `SUPABASE_KEY`
 
-#### **OpenAI API Key:**
-1. Go to [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-2. Create new key
-3. Copy the key → Use for `OPENAI_API_KEY`
 
 ## Build Configuration
 

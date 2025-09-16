@@ -40,9 +40,6 @@ In your Render dashboard, set these environment variables:
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_KEY=your_supabase_service_key
 
-# AI Configuration
-OPENAI_API_KEY=your_openai_api_key
-
 # Application Settings
 ENVIRONMENT=production
 DEBUG=false
@@ -131,10 +128,10 @@ Visit your Vercel app URL and test:
 - PDF report generation (FPDF2-based, deployment-friendly)
 - Patient management system
 - Database operations (Supabase)
-- AI chatbot integration (OpenAI GPT)
 - Authentication endpoints
 - Image processing with OpenCV-headless
 - Advanced ML models with optional loading
+- Risk assessment calculations
 
 ### 🚀 **Fully Enabled:**
 - **PDF Reports**: Alternative FPDF2-based generator (no compilation needed)
@@ -146,9 +143,9 @@ Visit your Vercel app URL and test:
 GET  /              # Health check
 GET  /health        # Detailed health check
 POST /patients/     # Create patient
-POST /analyze       # AI vein analysis (basic)
+POST /analyze       # AI vein analysis
 POST /symptoms/     # Record symptoms  
-POST /chat          # AI chatbot
+POST /risk-assessment/  # Health risk scoring
 GET  /patients/{id}/analyses  # Get patient analyses
 ```
 

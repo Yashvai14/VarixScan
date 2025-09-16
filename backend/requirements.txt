@@ -18,9 +18,6 @@ opencv-python-headless==4.8.1.78
 pillow==10.0.1
 numpy==1.24.3
 
-# AI & NLP
-openai==1.35.0
-
 # PDF Generation (lightweight)
 fpdf2==2.7.6
 

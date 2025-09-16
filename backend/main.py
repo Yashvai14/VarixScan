@@ -30,7 +30,8 @@ except Exception as e:
     db_manager = MockDBManager()
     convert_numpy_types = lambda x: x
 
-from ai_chatbot import medical_chatbot
+# Chatbot removed for deployment simplicity
+# from ai_chatbot import medical_chatbot
 
 # Optional ML model imports
 try:
@@ -279,7 +280,6 @@ async def health_check():
             "basic_ml_model": ML_BASIC_AVAILABLE,
             "advanced_ml_model": ML_ADVANCED_AVAILABLE,
             "pdf_reports": REPORTS_AVAILABLE,
-            "ai_chatbot": True,  # Always available
             "image_upload": True,  # Always available
             "patient_management": True  # Always available
         },
@@ -288,7 +288,7 @@ async def health_check():
             "torch": ML_BASIC_AVAILABLE or ML_ADVANCED_AVAILABLE,
             "scikit_learn": ML_ADVANCED_AVAILABLE,
             "fpdf2": REPORTS_AVAILABLE,
-            "openai": True
+            "database": DATABASE_AVAILABLE
         }
     }
 
@@ -697,37 +697,7 @@ async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "timestamp": datetime.now()}
 
-# Chat endpoint for AI assistant
-class ChatMessage(BaseModel):
-    message: str
-    language: str = "en"
-    session_id: str
-
-@app.post("/chat")
-async def chat_with_ai(chat_data: ChatMessage):
-    """Chat with AI medical assistant"""
-    try:
-        response = await medical_chatbot.get_response(
-            message=chat_data.message,
-            language=chat_data.language,
-            session_id=chat_data.session_id
-        )
-        return {
-            "response": response,
-            "language": chat_data.language,
-            "session_id": chat_data.session_id
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")
-
-@app.get("/chat/history/{session_id}")
-async def get_chat_history(session_id: str, limit: int = 50):
-    """Get chat history for a session"""
-    try:
-        history = db_manager.get_chat_history(session_id, limit)
-        return {"history": history, "session_id": session_id}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting chat history: {str(e)}")
+# Chatbot functionality removed for deployment simplicity
 
 # Risk assessment endpoint
 class RiskAssessmentData(BaseModel):
@@ -820,17 +790,6 @@ async def api_help():
                 "required_fields": ["file", "patient_id"],
                 "optional_fields": ["language"],
                 "example_curl": "curl -X POST http://localhost:8000/analyze -F 'file=@leg_image.jpg' -F 'patient_id=1' -F 'language=en'"
-            },
-            "/chat": {
-                "method": "POST",
-                "description": "Chat with AI medical assistant",
-                "required_fields": ["message", "session_id"],
-                "optional_fields": ["language"],
-                "example": {
-                    "message": "What are varicose veins?",
-                    "language": "en",
-                    "session_id": "user123"
-                }
             },
             "/risk-assessment": {
                 "method": "POST",
