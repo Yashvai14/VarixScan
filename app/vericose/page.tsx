@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import axios from "axios";
-import { getRequest, postRequest } from "@/lib/api";
 
 
 import { 
