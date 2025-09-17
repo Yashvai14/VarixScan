@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import axios from "axios";
+import api from "@/lib/api"; // Adjust path if api.ts is in another folder
 import { 
   Upload, 
   User, 
@@ -57,13 +57,11 @@ export default function UploadPage() {
     setResult("");
 
     try {
-      // Check if backend is available
-      const backendCheck = await axios.get("http://localhost:8000/health", {
-        timeout: 3000
-      }).catch(() => null);
+      // Step 0: Health check
+      const backendCheck = await api.get("/health").catch(() => null);
       
       if (!backendCheck) {
-        // Backend not available - demo mode
+        // Demo mode
         console.log("Backend not available, showing demo analysis...");
         await new Promise(resolve => setTimeout(resolve, 2000));
         const demoResults = [
@@ -81,47 +79,37 @@ export default function UploadPage() {
         name: name,
         age: parseInt(age),
         gender: gender,
-        phone: "+1234567890", 
+        phone: "+1234567890",
         email: `${name.toLowerCase().replace(' ', '')}@example.com`
       };
       
-      const patientRes = await axios.post("http://localhost:8000/patients/", patientData, {
-        headers: { "Content-Type": "application/json" },
-      });
-      
+      const patientRes = await api.post<{ patient_id: number }>("/patients/", patientData);
       const patientIdValue = patientRes.data.patient_id;
       setPatientId(patientIdValue);
-      
+
       // Step 2: Analyze image
       const formData = new FormData();
       formData.append("file", file);
       formData.append("patient_id", patientIdValue.toString());
       formData.append("language", "en");
 
-      const res = await axios.post("http://localhost:8000/analyze", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      
+      const res = await api.post<{
+        analysis_id: number;
+        diagnosis: string;
+        confidence: number;
+        severity: string;
+        detection_count?: number;
+        affected_area_ratio?: number;
+        recommendations?: string[];
+      }>("/analyze", formData, { headers: { "Content-Type": "multipart/form-data" } });
+
       setAnalysisData(res.data);
       setResult(`Patient: ${name}\nDiagnosis: ${res.data.diagnosis}\nConfidence: ${res.data.confidence}%\nSeverity: ${res.data.severity}`);
       
     } catch (err: unknown) {
       console.error("Error:", err);
-
-      if (axios.isAxiosError(err)) {
-        if (err.response) {
-          console.error("Response data:", err.response.data);
-          setError(`Error: ${err.response.data?.detail || 'Analysis failed'}`);
-        } else if (err.code === 'ECONNREFUSED' || err.message?.includes('Network Error')) {
-          setError("Backend server not running. Please start the backend server to perform real analysis.");
-        } else {
-          setError(err.message || "Error analyzing image. Please try again.");
-        }
-      } else if (err instanceof Error) {
-        setError(err.message || "Error analyzing image. Please try again.");
-      } else {
-        setError("Error analyzing image. Please try again.");
-      }
+      if (err instanceof Error) setError(err.message);
+      else setError("Error analyzing image. Please try again.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -137,26 +125,21 @@ export default function UploadPage() {
     setError("");
 
     try {
-      const generateResponse = await axios.post(
-        `http://localhost:8000/generate-report/${patientId}?analysis_id=${analysisData.analysis_id}&report_type=standard`
+      const generateResponse = await api.post<{ report_id: string }>(
+        `/generate-report/${patientId}?analysis_id=${analysisData.analysis_id}&report_type=standard`
       );
 
-      if (generateResponse.data) {
+      if (generateResponse?.data?.report_id) {
         const reportId = generateResponse.data.report_id;
         const downloadResponse = await fetch(
-          `http://localhost:8000/download-report/${reportId}`,
+          `${process.env.NEXT_PUBLIC_API_URL || "https://varixscan.onrender.com"}/download-report/${reportId}`,
           { 
             method: 'GET',
-            headers: {
-              'Cache-Control': 'no-cache',
-              'Pragma': 'no-cache'
-            }
+            headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
           }
         );
         
-        if (!downloadResponse.ok) {
-          throw new Error('Failed to download report');
-        }
+        if (!downloadResponse.ok) throw new Error('Failed to download report');
 
         const blob = await downloadResponse.blob();
         const pdfBlob = new Blob([blob], { type: 'application/pdf' });
@@ -165,8 +148,6 @@ export default function UploadPage() {
         a.style.display = 'none';
         a.href = url;
         a.download = `VarixScan-Report-${name}-${reportId}.pdf`;
-        a.rel = 'noopener';
-        a.href += `#${Date.now()}`;
         document.body.appendChild(a);
         setTimeout(() => {
           a.click();
@@ -178,14 +159,8 @@ export default function UploadPage() {
       }
     } catch (err: unknown) {
       console.error("Error generating report:", err);
-
-      if (axios.isAxiosError(err)) {
-        setError(err.message || "Failed to generate report. Please try again.");
-      } else if (err instanceof Error) {
-        setError(err.message || "Failed to generate report. Please try again.");
-      } else {
-        setError("Failed to generate report. Please try again.");
-      }
+      if (err instanceof Error) setError(err.message);
+      else setError("Failed to generate report. Please try again.");
     } finally {
       setIsGeneratingReport(false);
     }
