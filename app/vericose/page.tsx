@@ -3,8 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import axios from "axios";
-
-
 import { 
   Upload, 
   User, 
@@ -18,7 +16,6 @@ import {
   Download,
   FileText
 } from "lucide-react";
-
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -59,145 +56,140 @@ export default function UploadPage() {
     setError("");
     setResult("");
 
-    const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "https://varixscan.onrender.com";
-
-try {
-  // Check if backend is available
-  const backendCheck = await axios.get(`${BACKEND_URL}/health`, {
-    timeout: 3000
-  }).catch(() => null);
-  
-  if (!backendCheck) {
-    // Backend not available - demo mode
-    console.log("Backend not available, showing demo analysis...");
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    const demoResults = [
-      { diagnosis: "Mild Varicose Veins", confidence: 92, severity: "Mild" },
-      { diagnosis: "No Abnormalities Detected", confidence: 98, severity: "Normal" },
-      { diagnosis: "Moderate Varicose Veins", confidence: 87, severity: "Moderate" }
-    ];
-    const randomResult = demoResults[Math.floor(Math.random() * demoResults.length)];
-    setResult(`Patient: ${name}\nDiagnosis: ${randomResult.diagnosis}\nConfidence: ${randomResult.confidence}%\nSeverity: ${randomResult.severity}\n\n⚠️ Demo Mode: Backend server not running. Start the backend for real analysis.`);
-    return;
-  }
-
-  // Step 1: Create patient
-  const patientData = {
-    name: name,
-    age: parseInt(age),
-    gender: gender,
-    phone: "+1234567890", 
-    email: `${name.toLowerCase().replace(' ', '')}@example.com`
-  };
-  
-  const patientRes = await axios.post(`${BACKEND_URL}/patients/`, patientData, {
-    headers: { "Content-Type": "application/json" },
-  });
-  
-  const patientIdValue = patientRes.data.patient_id;
-  setPatientId(patientIdValue);
-  
-  // Step 2: Analyze image
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("patient_id", patientIdValue.toString());
-  formData.append("language", "en");
-
-  const res = await axios.post(`${BACKEND_URL}/analyze`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  
-  setAnalysisData(res.data);
-  setResult(`Patient: ${name}\nDiagnosis: ${res.data.diagnosis}\nConfidence: ${res.data.confidence}%\nSeverity: ${res.data.severity}`);
-  
-} catch (err: unknown) {
-  console.error("Error:", err);
-
-  if (axios.isAxiosError(err)) {
-    if (err.response) {
-      console.error("Response data:", err.response.data);
-      setError(`Error: ${err.response.data?.detail || 'Analysis failed'}`);
-    } else if (err.code === 'ECONNREFUSED' || err.message?.includes('Network Error')) {
-      setError("Backend server not running. Please start the backend server to perform real analysis.");
-    } else {
-      setError(err.message || "Error analyzing image. Please try again.");
-    }
-  } else if (err instanceof Error) {
-    setError(err.message || "Error analyzing image. Please try again.");
-  } else {
-    setError("Error analyzing image. Please try again.");
-  }
-} finally {
-  setIsAnalyzing(false);
-}
-}
-
-// Move generateReport outside of handleAnalyze
-const generateReport = async () => {
-  if (!patientId || !analysisData) {
-    setError("Analysis data not available for report generation");
-    return;
-  }
-
-  setIsGeneratingReport(true);
-  setError("");
-
-  try {
-    const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "https://varixscan.onrender.com";
-    const generateResponse = await axios.post(
-      `${BACKEND_URL}/generate-report/${patientId}?analysis_id=${analysisData.analysis_id}&report_type=standard`
-    );
-
-    if (generateResponse.data) {
-      const reportId = generateResponse.data.report_id;
-      const downloadResponse = await fetch(
-        `${BACKEND_URL}/download-report/${reportId}`,
-        { 
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        }
-      );
+    try {
+      // Check if backend is available
+      const backendCheck = await axios.get("http://localhost:8000/health", {
+        timeout: 3000
+      }).catch(() => null);
       
-      if (!downloadResponse.ok) {
-        throw new Error('Failed to download report');
+      if (!backendCheck) {
+        // Backend not available - demo mode
+        console.log("Backend not available, showing demo analysis...");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        const demoResults = [
+          { diagnosis: "Mild Varicose Veins", confidence: 92, severity: "Mild" },
+          { diagnosis: "No Abnormalities Detected", confidence: 98, severity: "Normal" },
+          { diagnosis: "Moderate Varicose Veins", confidence: 87, severity: "Moderate" }
+        ];
+        const randomResult = demoResults[Math.floor(Math.random() * demoResults.length)];
+        setResult(`Patient: ${name}\nDiagnosis: ${randomResult.diagnosis}\nConfidence: ${randomResult.confidence}%\nSeverity: ${randomResult.severity}\n\n⚠️ Demo Mode: Backend server not running. Start the backend for real analysis.`);
+        return;
       }
 
-      const blob = await downloadResponse.blob();
-      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(pdfBlob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `VarixScan-Report-${name}-${reportId}.pdf`;
-      a.rel = 'noopener';
-      a.href += `#${Date.now()}`;
-      document.body.appendChild(a);
-      setTimeout(() => {
-        a.click();
+      // Step 1: Create patient
+      const patientData = {
+        name: name,
+        age: parseInt(age),
+        gender: gender,
+        phone: "+1234567890", 
+        email: `${name.toLowerCase().replace(' ', '')}@example.com`
+      };
+      
+      const patientRes = await axios.post("http://localhost:8000/patients/", patientData, {
+        headers: { "Content-Type": "application/json" },
+      });
+      
+      const patientIdValue = patientRes.data.patient_id;
+      setPatientId(patientIdValue);
+      
+      // Step 2: Analyze image
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("patient_id", patientIdValue.toString());
+      formData.append("language", "en");
+
+      const res = await axios.post("http://localhost:8000/analyze", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      
+      setAnalysisData(res.data);
+      setResult(`Patient: ${name}\nDiagnosis: ${res.data.diagnosis}\nConfidence: ${res.data.confidence}%\nSeverity: ${res.data.severity}`);
+      
+    } catch (err: unknown) {
+      console.error("Error:", err);
+
+      if (axios.isAxiosError(err)) {
+        if (err.response) {
+          console.error("Response data:", err.response.data);
+          setError(`Error: ${err.response.data?.detail || 'Analysis failed'}`);
+        } else if (err.code === 'ECONNREFUSED' || err.message?.includes('Network Error')) {
+          setError("Backend server not running. Please start the backend server to perform real analysis.");
+        } else {
+          setError(err.message || "Error analyzing image. Please try again.");
+        }
+      } else if (err instanceof Error) {
+        setError(err.message || "Error analyzing image. Please try again.");
+      } else {
+        setError("Error analyzing image. Please try again.");
+      }
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const generateReport = async () => {
+    if (!patientId || !analysisData) {
+      setError("Analysis data not available for report generation");
+      return;
+    }
+
+    setIsGeneratingReport(true);
+    setError("");
+
+    try {
+      const generateResponse = await axios.post(
+        `http://localhost:8000/generate-report/${patientId}?analysis_id=${analysisData.analysis_id}&report_type=standard`
+      );
+
+      if (generateResponse.data) {
+        const reportId = generateResponse.data.report_id;
+        const downloadResponse = await fetch(
+          `http://localhost:8000/download-report/${reportId}`,
+          { 
+            method: 'GET',
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            }
+          }
+        );
+        
+        if (!downloadResponse.ok) {
+          throw new Error('Failed to download report');
+        }
+
+        const blob = await downloadResponse.blob();
+        const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(pdfBlob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `VarixScan-Report-${name}-${reportId}.pdf`;
+        a.rel = 'noopener';
+        a.href += `#${Date.now()}`;
+        document.body.appendChild(a);
         setTimeout(() => {
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
+          a.click();
+          setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          }, 100);
         }, 100);
-      }, 100);
-    }
-  } catch (err: unknown) {
-    console.error("Error generating report:", err);
+      }
+    } catch (err: unknown) {
+      console.error("Error generating report:", err);
 
-    if (axios.isAxiosError(err)) {
-      setError(err.message || "Failed to generate report. Please try again.");
-    } else if (err instanceof Error) {
-      setError(err.message || "Failed to generate report. Please try again.");
-    } else {
-      setError("Failed to generate report. Please try again.");
+      if (axios.isAxiosError(err)) {
+        setError(err.message || "Failed to generate report. Please try again.");
+      } else if (err instanceof Error) {
+        setError(err.message || "Failed to generate report. Please try again.");
+      } else {
+        setError("Failed to generate report. Please try again.");
+      }
+    } finally {
+      setIsGeneratingReport(false);
     }
-  } finally {
-    setIsGeneratingReport(false);
-  }
-};
-
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-medical-light via-white to-vascular-light p-6">
