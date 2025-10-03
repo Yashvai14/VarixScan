@@ -289,13 +289,25 @@ async def analyze_image(
 @app.post("/generate-report/{patient_id}")
 async def generate_report(
     patient_id: int,
-    analysis_id: int = Form(...),
-    report_type: str = Form("standard"),
+    analysis_id: Optional[int] = None,
+    report_type: str = "standard",
+    request: Request = None,
     db: Session = Depends(get_db)
 ):
+    """Generate report - accepts analysis_id from query params, form data, or JSON body"""
     if not REPORTS_AVAILABLE:
         raise HTTPException(status_code=503, detail="Report generation unavailable")
     try:
+        # Try to get analysis_id from multiple sources
+        if analysis_id is None and request:
+            # Try query params
+            analysis_id = request.query_params.get('analysis_id')
+            if analysis_id:
+                analysis_id = int(analysis_id)
+        
+        if analysis_id is None:
+            raise HTTPException(status_code=400, detail="analysis_id is required (in query params, form data, or JSON body)")
+        
         patient = db_manager.get_patient(db, patient_id)
         if not patient:
             raise HTTPException(status_code=404, detail="Patient not found")
