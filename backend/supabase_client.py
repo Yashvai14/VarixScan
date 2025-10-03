@@ -28,7 +28,7 @@ if not SUPABASE_URL or not SUPABASE_KEY:
         f"Available SUPABASE vars: {available_vars}"
     )
 
-print(f"✅ Supabase configuration loaded: URL={SUPABASE_URL[:20]}..., KEY=***{SUPABASE_KEY[-4:] if SUPABASE_KEY else 'None'}")
+print(f"[OK] Supabase configuration loaded: URL={SUPABASE_URL[:20]}..., KEY=***{SUPABASE_KEY[-4:] if SUPABASE_KEY else 'None'}")
 
 # Create Supabase client
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)

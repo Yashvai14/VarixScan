@@ -208,7 +208,7 @@ class AdvancedVeinDetector:
         if hessian_matrix is not None:
             try:
                 # Compute Hessian matrix eigenvalues
-                hxx, hxy, hyy = hessian_matrix(gray, sigma=2, order='rc')
+                hxx, hxy, hyy = hessian_matrix(gray, sigma=2, order='rc', use_gaussian_derivatives=False)
                 
                 # Calculate eigenvalues
                 trace = hxx + hyy
@@ -282,12 +282,18 @@ class AdvancedVeinDetector:
         sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
         sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
         sobel = np.sqrt(sobelx**2 + sobely**2)
-        sobel = (sobel / sobel.max() * 255).astype(np.uint8)
+        if sobel.max() > 0:
+            sobel = (sobel / sobel.max() * 255).astype(np.uint8)
+        else:
+            sobel = np.zeros_like(sobel, dtype=np.uint8)
         
         # 3. Laplacian of Gaussian
         log_filtered = cv2.Laplacian(cv2.GaussianBlur(gray, (3, 3), 0), cv2.CV_64F)
         log_filtered = np.absolute(log_filtered)
-        log_filtered = (log_filtered / log_filtered.max() * 255).astype(np.uint8)
+        if log_filtered.max() > 0:
+            log_filtered = (log_filtered / log_filtered.max() * 255).astype(np.uint8)
+        else:
+            log_filtered = np.zeros_like(log_filtered, dtype=np.uint8)
         
         # Combine all edge methods
         combined_edges = cv2.bitwise_or(canny, sobel)
