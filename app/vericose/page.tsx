@@ -71,6 +71,7 @@ export default function UploadPage() {
         ];
         const randomResult = demoResults[Math.floor(Math.random() * demoResults.length)];
         setResult(`Patient: ${name}\nDiagnosis: ${randomResult.diagnosis}\nConfidence: ${randomResult.confidence}%\nSeverity: ${randomResult.severity}\n\n⚠️ Demo Mode: Backend server not running. Start the backend for real analysis.`);
+        setIsAnalyzing(false);
         return;
       }
 
@@ -87,21 +88,50 @@ export default function UploadPage() {
       const patientIdValue = patientRes.data.patient_id;
       setPatientId(patientIdValue);
 
-      // Step 2: Analyze image
+      // Step 2: Analyze image with Retry Logic
       const formData = new FormData();
       formData.append("file", file);
       formData.append("patient_id", patientIdValue.toString());
       formData.append("language", "en");
 
-      const res = await api.post<{
-        analysis_id: number;
-        diagnosis: string;
-        confidence: number;
-        severity: string;
-        detection_count?: number;
-        affected_area_ratio?: number;
-        recommendations?: string[];
-      }>("/analyze", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      const maxRetries = 3;
+      let attempt = 0;
+      let lastError = null;
+      let res = null;
+
+      while (attempt < maxRetries) {
+        try {
+          if (attempt > 0) {
+             setError(`Server is busy. Retrying analysis... (Attempt ${attempt + 1}/${maxRetries})`);
+          }
+          res = await api.post<{
+            analysis_id: number;
+            diagnosis: string;
+            confidence: number;
+            severity: string;
+            detection_count?: number;
+            affected_area_ratio?: number;
+            recommendations?: string[];
+          }>("/analyze", formData, { headers: { "Content-Type": "multipart/form-data" }, timeout: 30000 });
+          
+          // Clear any retry error message if successful
+          setError(""); 
+          break; // Success, exit retry loop
+        } catch (err) {
+          lastError = err;
+          attempt++;
+          if (attempt >= maxRetries) {
+            console.error("AI Analysis failed after max retries:", lastError);
+            break;
+          }
+          // Wait 2 seconds before retrying
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+
+      if (!res) {
+        throw new Error("Failed to connect to AI server after multiple attempts. Please check your connection and try again.");
+      }
 
       setAnalysisData(res.data);
       setResult(`Patient: ${name}\nDiagnosis: ${res.data.diagnosis}\nConfidence: ${res.data.confidence}%\nSeverity: ${res.data.severity}`);
@@ -109,7 +139,7 @@ export default function UploadPage() {
     } catch (err: unknown) {
       console.error("Error:", err);
       if (err instanceof Error) setError(err.message);
-      else setError("Error analyzing image. Please try again.");
+      else setError("Error analyzing image. Please try again later.");
     } finally {
       setIsAnalyzing(false);
     }

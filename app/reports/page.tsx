@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Download, FileText, Calendar, User, Activity } from "lucide-react";
-import { reportService, type Report } from '../../lib/supabase';
+import { reportService, type Report } from '../../lib/api';
 
 interface ReportWithPatient extends Report {
   patients?: {

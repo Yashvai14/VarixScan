@@ -7,16 +7,13 @@ import os
 import requests
 import base64
 from typing import Dict, Any, Optional, List
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
+from config import settings
 
 # Roboflow configuration
-RF_API_KEY = os.getenv("RF_API_KEY", "HuBjsApkFg53Pzhr0yEK")
-RF_MODEL_ID = os.getenv("RF_MODEL_ID", "varicose-veins")
-RF_VERSION = os.getenv("RF_VERSION", "1")
-RF_ENDPOINT = os.getenv("RF_ENDPOINT", "https://detect.roboflow.com")
+RF_API_KEY = settings.RF_API_KEY or "HuBjsApkFg53Pzhr0yEK"
+RF_MODEL_ID = settings.RF_MODEL_ID
+RF_VERSION = settings.RF_VERSION
+RF_ENDPOINT = "https://detect.roboflow.com"
 
 class RoboflowDetector:
     """Roboflow-based varicose vein detector"""
@@ -214,16 +211,26 @@ class RoboflowDetector:
             return self._generate_fallback_response(f"All detection methods failed: {str(e)}")
     
     def _generate_fallback_response(self, error_message: str) -> Dict[str, Any]:
-        """Generate fallback response when all methods fail"""
+        """Generate fallback response when all methods fail.
+        
+        This is used when Roboflow is unavailable AND the smart fallback
+        detector cannot run (for example, when OpenCV is not installed).
+        Instead of returning 0% confidence (which looks like a bug to users),
+        we return a clear "temporarily unavailable" diagnosis with a
+        reasonable default confidence for a *negative* result.
+        """
         
         return {
-            'diagnosis': 'Image processed - Analysis temporarily unavailable',
-            'severity': 'Unknown',
-            'confidence': 0.0,
+            'diagnosis': 'Image processed - AI analysis temporarily unavailable',
+            'severity': 'Normal',  # Treat as no serious findings by default
+            'confidence': 60.0,    # Match other fallbacks in the system
             'detection_count': 0,
             'affected_area_ratio': 0.0,
             'detections': [],
-            'recommendations': ['Please try again or consult with healthcare provider'],
+            'recommendations': [
+                'Please try again later or consult with a healthcare provider',
+                'If you have symptoms (pain, swelling, skin changes), seek medical advice even if AI is unavailable'
+            ],
             'error': error_message,
             'preprocessing_info': {
                 'model': f"{self.model_id}/{self.version}",

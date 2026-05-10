@@ -1,339 +1,195 @@
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 import json
-import numpy as np
-from supabase_client import get_supabase_client
-from supabase import Client
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Text, DateTime, ForeignKey, Float, JSON
+from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 
-def convert_numpy_types(obj):
-    """Recursively convert numpy data types to native Python types for JSON serialization"""
-    if isinstance(obj, np.integer):
-        return int(obj)
-    elif isinstance(obj, np.floating):
-        return float(obj)
-    elif isinstance(obj, np.ndarray):
-        return obj.tolist()
-    elif isinstance(obj, dict):
-        return {key: convert_numpy_types(value) for key, value in obj.items()}
-    elif isinstance(obj, list):
-        return [convert_numpy_types(item) for item in obj]
-    else:
-        return obj
+Base = declarative_base()
+
+class Patient(Base):
+    __tablename__ = "patients"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    age = Column(Integer, nullable=False)
+    gender = Column(String(10), nullable=False)
+    phone = Column(String(20), nullable=True)
+    email = Column(String(100), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    analyses = relationship("Analysis", back_populates="patient")
+    symptoms = relationship("SymptomRecord", back_populates="patient")
+
+class Analysis(Base):
+    __tablename__ = "analyses"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"))
+    image_path = Column(String(255), nullable=False)
+    diagnosis = Column(String(100), nullable=False)
+    severity = Column(String(50), nullable=False)
+    confidence = Column(Float, nullable=False)
+    detection_count = Column(Integer, default=0)
+    affected_area_ratio = Column(Float, default=0.0)
+    recommendations = Column(JSON, nullable=True)
+    preprocessing_info = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    patient = relationship("Patient", back_populates="analyses")
+
+class SymptomRecord(Base):
+    __tablename__ = "symptom_records"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"))
+    pain_level = Column(Integer, nullable=False)  # 0-10 scale
+    swelling = Column(Boolean, default=False)
+    cramping = Column(Boolean, default=False)
+    itching = Column(Boolean, default=False)
+    burning_sensation = Column(Boolean, default=False)
+    leg_heaviness = Column(Boolean, default=False)
+    skin_discoloration = Column(Boolean, default=False)
+    ulcers = Column(Boolean, default=False)
+    duration_symptoms = Column(String(50), nullable=True)  # weeks, months, years
+    activity_impact = Column(Integer, nullable=True)  # 0-10 scale
+    family_history = Column(Boolean, default=False)
+    occupation_standing = Column(Boolean, default=False)
+    pregnancy_history = Column(Boolean, default=False)
+    previous_treatment = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    patient = relationship("Patient", back_populates="symptoms")
+
+class Report(Base):
+    __tablename__ = "reports"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"))
+    analysis_id = Column(Integer, ForeignKey("analyses.id"))
+    report_type = Column(String(50), default="standard")  # standard, comparative, follow-up
+    content = Column(Text, nullable=True)
+    pdf_path = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Appointment(Base):
+    __tablename__ = "appointments"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"))
+    doctor_name = Column(String(100), nullable=True)
+    appointment_type = Column(String(50), nullable=False)  # consultation, follow-up, teleconsultation
+    scheduled_date = Column(DateTime, nullable=False)
+    status = Column(String(20), default="scheduled")  # scheduled, completed, cancelled
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Reminder(Base):
+    __tablename__ = "reminders"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"))
+    reminder_type = Column(String(50), nullable=False)  # scan, medication, exercise, appointment
+    message = Column(Text, nullable=False)
+    scheduled_date = Column(DateTime, nullable=False)
+    is_sent = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+from config import settings
 
 class DatabaseManager:
-    def __init__(self):
-        self.supabase: Client = get_supabase_client()
+    def __init__(self, database_url: str = settings.DATABASE_URL):
+        self.engine = create_engine(database_url)
+        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        Base.metadata.create_all(bind=self.engine)
     
     def get_db(self):
-        """For compatibility with existing code - returns self"""
-        return self
+        db = self.SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
     
-    def SessionLocal(self):
-        """For compatibility with SQLAlchemy-style code - returns self"""
-        return self
-    
-    def close(self):
-        """For compatibility - Supabase client doesn't need explicit closing"""
-        pass
-    
-    # Patient operations
     def create_patient(self, db, patient_data: dict):
         """Create a new patient record"""
-        try:
-            print(f"Inserting patient data: {patient_data}")
-            result = self.supabase.table("patients").insert(patient_data).execute()
-            print(f"Supabase result: {result}")
-            
-            if result.data and len(result.data) > 0:
-                patient = result.data[0]
-                print(f"Patient created: {patient}")
-                return patient
-            else:
-                print(f"No data returned from Supabase. Full result: {result}")
-                raise Exception(f"Failed to create patient. Result: {result}")
-        except Exception as e:
-            print(f"Exception in create_patient: {str(e)}")
-            print(f"Exception type: {type(e)}")
-            raise e
+        patient = Patient(**patient_data)
+        db.add(patient)
+        db.commit()
+        db.refresh(patient)
+        return patient
     
     def get_patient(self, db, patient_id: int):
         """Get patient by ID"""
-        try:
-            result = self.supabase.table("patients").select("*").eq("id", patient_id).execute()
-            if result.data:
-                return result.data[0]
-            return None
-        except Exception as e:
-            print(f"Error getting patient: {str(e)}")
-            return None
+        return db.query(Patient).filter(Patient.id == patient_id).first()
     
     def get_patient_by_email(self, db, email: str):
         """Get patient by email"""
-        try:
-            result = self.supabase.table("patients").select("*").eq("email", email).execute()
-            if result.data:
-                return result.data[0]
-            return None
-        except Exception as e:
-            print(f"Error getting patient by email: {str(e)}")
-            return None
+        return db.query(Patient).filter(Patient.email == email).first()
     
-    # Analysis operations
     def create_analysis(self, db, analysis_data: dict):
         """Create a new analysis record"""
-        try:
-            print(f"Creating analysis with data: {analysis_data}")
-            
-            # Convert numpy types to native Python types for JSON serialization
-            analysis_data = convert_numpy_types(analysis_data)
-            
-            # Convert lists to JSON strings for JSONB columns
-            if 'recommendations' in analysis_data and isinstance(analysis_data['recommendations'], list):
-                analysis_data['recommendations'] = analysis_data['recommendations']  # Supabase handles JSONB automatically
-            if 'preprocessing_info' in analysis_data and isinstance(analysis_data['preprocessing_info'], dict):
-                analysis_data['preprocessing_info'] = analysis_data['preprocessing_info']  # Supabase handles JSONB automatically
-            
-            print(f"Inserting analysis data: {analysis_data}")
-            result = self.supabase.table("analyses").insert(analysis_data).execute()
-            print(f"Supabase analysis result: {result}")
-            
-            if result.data and len(result.data) > 0:
-                analysis = result.data[0]
-                print(f"Analysis created successfully: {analysis}")
-                return analysis
-            else:
-                print(f"No analysis data returned. Full result: {result}")
-                raise Exception(f"Failed to create analysis. Result: {result}")
-        except Exception as e:
-            print(f"Exception in create_analysis: {str(e)}")
-            print(f"Exception type: {type(e)}")
-            raise e
+        analysis = Analysis(**analysis_data)
+        db.add(analysis)
+        db.commit()
+        db.refresh(analysis)
+        return analysis
     
     def get_patient_analyses(self, db, patient_id: int):
         """Get all analyses for a patient"""
-        try:
-            result = self.supabase.table("analyses").select("*").eq("patient_id", patient_id).order("created_at", desc=True).execute()
-            return result.data if result.data else []
-        except Exception as e:
-            print(f"Error getting patient analyses: {str(e)}")
-            return []
+        return db.query(Analysis).filter(Analysis.patient_id == patient_id).order_by(Analysis.created_at.desc()).all()
     
-    def get_analysis_comparison(self, db, patient_id: int, limit: int = 5):
-        """Get recent analyses for comparison"""
-        try:
-            result = self.supabase.table("analyses").select("*").eq("patient_id", patient_id).order("created_at", desc=True).limit(limit).execute()
-            return result.data if result.data else []
-        except Exception as e:
-            print(f"Error getting analysis comparison: {str(e)}")
-            return []
-    
-    # Symptom record operations
     def create_symptom_record(self, db, symptom_data: dict):
         """Create a new symptom record"""
-        try:
-            result = self.supabase.table("symptom_records").insert(symptom_data).execute()
-            if result.data:
-                return result.data[0]
-            else:
-                raise Exception("Failed to create symptom record")
-        except Exception as e:
-            print(f"Error creating symptom record: {str(e)}")
-            raise e
+        symptom_record = SymptomRecord(**symptom_data)
+        db.add(symptom_record)
+        db.commit()
+        db.refresh(symptom_record)
+        return symptom_record
     
     def get_patient_symptoms(self, db, patient_id: int):
         """Get all symptom records for a patient"""
-        try:
-            result = self.supabase.table("symptom_records").select("*").eq("patient_id", patient_id).order("created_at", desc=True).execute()
-            return result.data if result.data else []
-        except Exception as e:
-            print(f"Error getting patient symptoms: {str(e)}")
-            return []
+        return db.query(SymptomRecord).filter(SymptomRecord.patient_id == patient_id).order_by(SymptomRecord.created_at.desc()).all()
     
-    # Report operations
     def create_report(self, db, report_data: dict):
         """Create a new report"""
-        try:
-            result = self.supabase.table("reports").insert(report_data).execute()
-            if result.data:
-                return result.data[0]
-            else:
-                raise Exception("Failed to create report")
-        except Exception as e:
-            print(f"Error creating report: {str(e)}")
-            raise e
-    
-    def get_patient_reports(self, db, patient_id: int):
-        """Get all reports for a patient"""
-        try:
-            result = self.supabase.table("reports").select("*").eq("patient_id", patient_id).order("created_at", desc=True).execute()
-            return result.data if result.data else []
-        except Exception as e:
-            print(f"Error getting patient reports: {str(e)}")
-            return []
+        report = Report(**report_data)
+        db.add(report)
+        db.commit()
+        db.refresh(report)
+        return report
     
     def get_report(self, db, report_id: int):
         """Get report by ID"""
-        try:
-            result = self.supabase.table("reports").select("*").eq("id", report_id).execute()
-            if result.data:
-                return result.data[0]
-            return None
-        except Exception as e:
-            print(f"Error getting report: {str(e)}")
-            return None
+        return db.query(Report).filter(Report.id == report_id).first()
     
-    # Appointment operations
+    def get_analysis_comparison(self, db, patient_id: int, limit: int = 5):
+        """Get recent analyses for comparison"""
+        return db.query(Analysis).filter(Analysis.patient_id == patient_id).order_by(Analysis.created_at.desc()).limit(limit).all()
+    
     def create_appointment(self, db, appointment_data: dict):
         """Create a new appointment"""
-        try:
-            result = self.supabase.table("appointments").insert(appointment_data).execute()
-            if result.data:
-                return result.data[0]
-            else:
-                raise Exception("Failed to create appointment")
-        except Exception as e:
-            print(f"Error creating appointment: {str(e)}")
-            raise e
+        appointment = Appointment(**appointment_data)
+        db.add(appointment)
+        db.commit()
+        db.refresh(appointment)
+        return appointment
     
-    def get_patient_appointments(self, db, patient_id: int):
-        """Get all appointments for a patient"""
-        try:
-            result = self.supabase.table("appointments").select("*").eq("patient_id", patient_id).order("scheduled_date", desc=True).execute()
-            return result.data if result.data else []
-        except Exception as e:
-            print(f"Error getting patient appointments: {str(e)}")
-            return []
-    
-    # Reminder operations
     def create_reminder(self, db, reminder_data: dict):
         """Create a new reminder"""
-        try:
-            result = self.supabase.table("reminders").insert(reminder_data).execute()
-            if result.data:
-                return result.data[0]
-            else:
-                raise Exception("Failed to create reminder")
-        except Exception as e:
-            print(f"Error creating reminder: {str(e)}")
-            raise e
+        reminder = Reminder(**reminder_data)
+        db.add(reminder)
+        db.commit()
+        db.refresh(reminder)
+        return reminder
     
     def get_pending_reminders(self, db):
         """Get all pending reminders"""
-        try:
-            result = self.supabase.table("reminders").select("*").eq("is_sent", False).lte("scheduled_date", datetime.utcnow().isoformat()).execute()
-            return result.data if result.data else []
-        except Exception as e:
-            print(f"Error getting pending reminders: {str(e)}")
-            return []
-    
-    # Risk assessment operations
-    def create_risk_assessment(self, db, assessment_data: dict):
-        """Create a new risk assessment"""
-        try:
-            # Convert risk_factors and recommendations to JSON
-            if 'risk_factors' in assessment_data and isinstance(assessment_data['risk_factors'], (list, dict)):
-                assessment_data['risk_factors'] = json.dumps(assessment_data['risk_factors'])
-            if 'recommendations' in assessment_data and isinstance(assessment_data['recommendations'], (list, dict)):
-                assessment_data['recommendations'] = json.dumps(assessment_data['recommendations'])
-            
-            result = self.supabase.table("risk_assessments").insert(assessment_data).execute()
-            if result.data:
-                return result.data[0]
-            else:
-                raise Exception("Failed to create risk assessment")
-        except Exception as e:
-            print(f"Error creating risk assessment: {str(e)}")
-            raise e
-    
-    def get_patient_risk_assessments(self, db, patient_id: int):
-        """Get all risk assessments for a patient"""
-        try:
-            result = self.supabase.table("risk_assessments").select("*").eq("patient_id", patient_id).order("created_at", desc=True).execute()
-            return result.data if result.data else []
-        except Exception as e:
-            print(f"Error getting patient risk assessments: {str(e)}")
-            return []
-    
-    # Chat message operations
-    def save_chat_message(self, session_id: str, user_message: str, ai_response: str, language: str = "en"):
-        """Save chat message to database"""
-        try:
-            message_data = {
-                "session_id": session_id,
-                "user_message": user_message,
-                "ai_response": ai_response,
-                "language": language
-            }
-            result = self.supabase.table("chat_messages").insert(message_data).execute()
-            return result.data[0] if result.data else None
-        except Exception as e:
-            print(f"Error saving chat message: {str(e)}")
-            return None
-    
-    def get_chat_history(self, session_id: str, limit: int = 50):
-        """Get chat history for a session"""
-        try:
-            result = self.supabase.table("chat_messages").select("*").eq("session_id", session_id).order("created_at", desc=True).limit(limit).execute()
-            return result.data if result.data else []
-        except Exception as e:
-            print(f"Error getting chat history: {str(e)}")
-            return []
-    
-    # Wearable data operations
-    def save_wearable_data(self, db, wearable_data: dict):
-        """Save wearable device data"""
-        try:
-            result = self.supabase.table("wearable_data").insert(wearable_data).execute()
-            if result.data:
-                return result.data[0]
-            else:
-                raise Exception("Failed to save wearable data")
-        except Exception as e:
-            print(f"Error saving wearable data: {str(e)}")
-            raise e
-    
-    def get_patient_wearable_data(self, db, patient_id: int, days: int = 7):
-        """Get wearable data for a patient for the specified number of days"""
-        try:
-            from datetime import timedelta
-            start_date = (datetime.utcnow() - timedelta(days=days)).isoformat()
-            
-            result = self.supabase.table("wearable_data").select("*").eq("patient_id", patient_id).gte("recorded_at", start_date).order("recorded_at", desc=True).execute()
-            return result.data if result.data else []
-        except Exception as e:
-            print(f"Error getting patient wearable data: {str(e)}")
-            return []
+        return db.query(Reminder).filter(
+            Reminder.is_sent == False,
+            Reminder.scheduled_date <= datetime.utcnow()
+        ).all()
 
 # Initialize database manager
 db_manager = DatabaseManager()
-
-# Legacy classes for compatibility
-class Patient:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-class Analysis:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-class SymptomRecord:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-class Report:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-class Appointment:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-class Reminder:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)

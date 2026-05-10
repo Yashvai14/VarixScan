@@ -16,7 +16,7 @@ import {
   Eye,
   Download
 } from "lucide-react";
-import { dashboardService, type Analysis, type Patient } from '../../lib/supabase';
+import { dashboardService, type Analysis, type Patient } from '../../lib/api';
 
 interface DashboardStats {
   totalPatients: number;

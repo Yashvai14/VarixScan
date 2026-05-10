@@ -108,3 +108,16 @@ test_*.pdf
 # Ignore training datasets and model directories
 Varicose-Disease-*/
 **/Varicose-Disease-*/
+
+# Model files
+*.pth
+*.pt
+
+# Backend reports and uploads
+backend/reports/*.pdf
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# DB files
+backend/*.db
+backend/*.sqlite3
