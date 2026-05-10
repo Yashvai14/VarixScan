@@ -23,6 +23,9 @@ psycopg2-binary==2.9.9
 opencv-python-headless==4.8.1.78
 pillow==10.0.1
 numpy==1.24.3
+scipy==1.11.3
+scikit-image==0.21.0
+scikit-learn==1.3.2
 
 # PDF Generation (lightweight)
 fpdf2==2.7.6

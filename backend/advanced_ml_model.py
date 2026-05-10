@@ -208,7 +208,7 @@ class AdvancedVeinDetector:
         if hessian_matrix is not None:
             try:
                 # Compute Hessian matrix eigenvalues
-                hxx, hxy, hyy = hessian_matrix(gray, sigma=2, order='rc', use_gaussian_derivatives=False)
+                hxx, hxy, hyy = hessian_matrix(gray, sigma=2, order='rc')
                 
                 # Calculate eigenvalues
                 trace = hxx + hyy
